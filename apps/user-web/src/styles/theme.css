@@ -1,0 +1,16 @@
+:root {
+  --font-body: "Inter", sans-serif;
+  --mobile-frame: 428px;
+  --mobile-radius: 36px;
+  --color-surface: #ffffff;
+  --color-soft: #f3f3f3;
+  --color-soft-strong: #eeeeee;
+  --color-border: #e8e8e8;
+  --color-text: #1f1f1f;
+  --color-muted: #848484;
+  --color-dark: #2f2f2f;
+  --color-accent: #f5ddcf;
+  --color-accent-2: #dff0d7;
+  --color-warning: #f1e0b0;
+  --shadow-soft: 0 16px 40px rgba(19, 24, 37, 0.08);
+}

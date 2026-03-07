@@ -1,0 +1,30 @@
+.screen {
+  max-width: var(--mobile-frame);
+  min-height: 100vh;
+  margin: 0 auto;
+  background: var(--color-surface);
+  display: grid;
+  place-items: center;
+  box-shadow: var(--shadow-soft);
+}
+
+.content {
+  text-align: center;
+}
+
+.content h1 {
+  margin: 0 0 8px;
+}
+
+.content p {
+  margin: 0;
+  color: #767676;
+}
+
+@media (min-width: 620px) {
+  .screen {
+    border-radius: var(--mobile-radius);
+    margin: 18px auto;
+    min-height: calc(100vh - 36px);
+  }
+}

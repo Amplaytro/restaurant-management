@@ -1,0 +1,21 @@
+{
+  "name": "final-evaluation-project",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev -w @final-evaluation/api\" \"npm run dev -w @final-evaluation/admin-web\" \"npm run dev -w @final-evaluation/user-web\"",
+    "dev:api": "npm run dev -w @final-evaluation/api",
+    "dev:admin": "npm run dev -w @final-evaluation/admin-web",
+    "dev:user": "npm run dev -w @final-evaluation/user-web",
+    "build": "npm run build -w @final-evaluation/api && npm run build -w @final-evaluation/admin-web && npm run build -w @final-evaluation/user-web",
+    "seed": "npm run seed -w @final-evaluation/api"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}

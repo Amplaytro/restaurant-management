@@ -1,0 +1,144 @@
+.page {
+  display: grid;
+  grid-template-columns: minmax(320px, 430px) 1fr;
+  gap: 18px;
+  align-items: start;
+}
+
+.formCard,
+.listCard {
+  background: var(--color-panel-soft);
+  border: 1px solid var(--color-border);
+  border-radius: 24px;
+  padding: 18px;
+}
+
+.uploadPreview {
+  height: 220px;
+  border-radius: 18px;
+  border: 2px dashed #d6dbd8;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  background: white;
+  color: #a2a7a5;
+  margin-bottom: 16px;
+}
+
+.uploadPreview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.form {
+  display: grid;
+  gap: 12px;
+}
+
+.form input,
+.form textarea,
+.form select,
+.form button {
+  border-radius: 14px;
+  border: 1px solid #d6dcda;
+  min-height: 50px;
+  padding: 0 14px;
+  background: white;
+}
+
+.form textarea {
+  padding-top: 14px;
+  min-height: 110px;
+  resize: vertical;
+}
+
+.form button {
+  border: 0;
+  background: #2d2d2d;
+  color: white;
+  font-weight: 600;
+}
+
+.listHeader h1 {
+  margin: 0;
+  font-size: 32px;
+  color: #5d5f5e;
+}
+
+.listHeader p {
+  margin: 6px 0 0;
+  color: #9fa4a2;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.menuItem {
+  display: grid;
+  grid-template-columns: 92px 1fr auto;
+  gap: 14px;
+  align-items: center;
+  background: white;
+  border-radius: 18px;
+  padding: 12px;
+  transition: filter 180ms ease, opacity 180ms ease;
+}
+
+.menuItem img {
+  width: 92px;
+  height: 92px;
+  border-radius: 16px;
+  object-fit: cover;
+}
+
+.menuBody strong {
+  display: block;
+  font-size: 18px;
+  color: #454846;
+}
+
+.menuBody p {
+  margin: 6px 0;
+  color: #8f9492;
+  font-size: 14px;
+}
+
+.menuBody span {
+  color: #686c6b;
+  font-size: 13px;
+}
+
+.menuActions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.menuActions button {
+  border: 0;
+  border-radius: 999px;
+  padding: 8px 14px;
+  background: #1d1d1d;
+  color: white;
+}
+
+.dimmed {
+  filter: blur(5px);
+  opacity: 0.38;
+}
+
+.loading,
+.error {
+  color: #c14d4d;
+}
+
+@media (max-width: 1200px) {
+  .page {
+    grid-template-columns: 1fr;
+  }
+}

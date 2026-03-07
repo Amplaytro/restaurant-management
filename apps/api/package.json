@@ -1,0 +1,19 @@
+{
+  "name": "@final-evaluation/api",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js",
+    "build": "node -e \"console.log('API build step not required')\"",
+    "seed": "node src/scripts/seed.js"
+  },
+  "dependencies": {
+    "@final-evaluation/shared": "1.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "mongoose": "^8.19.3",
+    "multer": "^2.0.2"
+  }
+}

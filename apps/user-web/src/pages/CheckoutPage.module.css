@@ -1,0 +1,167 @@
+.screen {
+  max-width: var(--mobile-frame);
+  min-height: 100vh;
+  margin: 0 auto;
+  background: var(--color-surface);
+  padding: 20px 20px 120px;
+  box-shadow: var(--shadow-soft);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.header button {
+  border: 0;
+  background: #f2f2f2;
+  border-radius: 18px;
+  padding: 12px 16px;
+}
+
+.header h1 {
+  margin: 0;
+}
+
+.summaryCard,
+.formBlock,
+.previewCard {
+  border-radius: 24px;
+  background: #f8f8f8;
+  border: 1px solid var(--color-border);
+}
+
+.summaryCard {
+  margin-top: 20px;
+  overflow: hidden;
+}
+
+.itemRow {
+  display: grid;
+  grid-template-columns: 72px 1fr 36px;
+  gap: 12px;
+  align-items: center;
+  padding: 14px;
+  border-top: 1px solid var(--color-border);
+}
+
+.itemRow:first-child {
+  border-top: 0;
+}
+
+.itemRow img {
+  width: 72px;
+  height: 72px;
+  border-radius: 16px;
+  object-fit: cover;
+}
+
+.itemRow button {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 0;
+  background: #1f1f1f;
+  color: white;
+  font-size: 24px;
+}
+
+.itemBody strong {
+  display: block;
+}
+
+.itemBody span {
+  color: #7f7f7f;
+  font-size: 13px;
+}
+
+.modeToggle {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.modeToggle button {
+  border: 0;
+  border-radius: 18px;
+  padding: 14px 16px;
+  background: #f0f0f0;
+}
+
+.modeActive {
+  background: #1f1f1f !important;
+  color: white;
+}
+
+.formBlock {
+  margin-top: 16px;
+  padding: 16px;
+  display: grid;
+  gap: 12px;
+}
+
+.formBlock input,
+.formBlock textarea {
+  border-radius: 16px;
+  border: 1px solid #dedede;
+  min-height: 52px;
+  padding: 0 14px;
+  background: white;
+}
+
+.formBlock textarea {
+  padding-top: 12px;
+}
+
+.instructionsLink {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+  border-radius: 18px;
+  background: #f7f7f7;
+  border: 1px solid var(--color-border);
+  padding: 18px;
+}
+
+.instructionsLink span {
+  color: #8b8b8b;
+  font-size: 12px;
+}
+
+.previewCard {
+  margin-top: 16px;
+  padding: 18px;
+}
+
+.previewCard strong {
+  display: block;
+  font-size: 24px;
+}
+
+.previewCard span {
+  color: #666;
+}
+
+.swipeWrap {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  width: min(calc(100vw - 18px), var(--mobile-frame));
+  transform: translateX(-50%);
+  padding: 0 18px;
+}
+
+.error {
+  color: #c14d4d;
+}
+
+@media (min-width: 620px) {
+  .screen {
+    border-radius: var(--mobile-radius);
+    margin: 18px auto;
+    min-height: calc(100vh - 36px);
+  }
+}

@@ -1,0 +1,20 @@
+:root {
+  --font-body: "Inter", sans-serif;
+  --font-accent: "Poppins", sans-serif;
+  --font-numeric: "Lato", sans-serif;
+  --color-page: #eef2f1;
+  --color-panel: #fbfbfb;
+  --color-panel-soft: #f1f6f4;
+  --color-border: #d5dbd8;
+  --color-text: #606261;
+  --color-muted: #a6aba8;
+  --color-dark: #2d2d2d;
+  --color-green: #41c764;
+  --color-purple: #6f56b6;
+  --color-card-blue: #e3eefb;
+  --shadow-soft: 0 10px 30px rgba(40, 54, 49, 0.04);
+  --radius-xl: 32px;
+  --radius-lg: 22px;
+  --radius-md: 16px;
+  --radius-sm: 10px;
+}
