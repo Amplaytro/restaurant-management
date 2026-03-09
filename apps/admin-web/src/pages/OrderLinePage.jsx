@@ -1,25 +1,22 @@
-import { resolveAssetSource } from "@final-evaluation/assets";
-import { buildItemCountLabel, formatCurrency } from "@final-evaluation/shared";
+import { formatCurrency } from "@final-evaluation/shared";
 import { useEffect, useMemo, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import { adminApi } from "../api/client.js";
 import styles from "./OrderLinePage.module.css";
 
-const filterOptions = [
-  { key: "all", label: "All" },
-  { key: "dine-in", label: "Dine In" },
-  { key: "waitlist", label: "Wait List" },
-  { key: "takeaway", label: "Take Away" },
-  { key: "done", label: "Done" },
-];
-
 function timeLabel(createdAt) {
   const delta = Math.max(0, Date.now() - new Date(createdAt).getTime());
   const minutes = Math.floor(delta / 60000);
-  if (minutes < 1) {
-    return "Just now";
+  if (minutes < 60) {
+    return `${Math.max(1, minutes)} min`;
   }
-  return `${minutes} min ago`;
+
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) {
+    return `${hours} hr`;
+  }
+
+  return `${Math.floor(hours / 24)} day`;
 }
 
 function orderMatches(query, order) {
@@ -32,78 +29,112 @@ function orderMatches(query, order) {
     .includes(query.toLowerCase());
 }
 
+function ticketTone(order) {
+  if (order.type === "takeaway") {
+    return "takeaway";
+  }
+
+  if (order.queueStatus === "done") {
+    return "done";
+  }
+
+  return "processing";
+}
+
+function badgeLines(order) {
+  if (order.queueStatus === "done") {
+    return { primary: "Done", secondary: "Served" };
+  }
+
+  if (order.type === "takeaway") {
+    return { primary: "Take Away", secondary: "Not Picked" };
+  }
+
+  return {
+    primary: "Dine In",
+    secondary: `Ongoing ${Math.max(1, order.remainingMinutes)} min`,
+  };
+}
+
+function footerLabel(order) {
+  if (order.queueStatus === "done") {
+    return "Order Done";
+  }
+
+  return `Processing ${order.itemCount}`;
+}
+
 export function OrderLinePage() {
   const { searchQuery } = useOutletContext();
-  const [activeFilter, setActiveFilter] = useState("all");
   const [orders, setOrders] = useState([]);
   const [error, setError] = useState("");
 
   useEffect(() => {
     adminApi
-      .getOrders(activeFilter)
+      .getOrders("all")
       .then(setOrders)
       .catch((requestError) => setError(requestError.message));
-  }, [activeFilter]);
+  }, []);
 
-  const counts = useMemo(() => ({
-    all: orders.length,
-    "dine-in": orders.filter((order) => order.type === "dineIn").length,
-    waitlist: orders.filter((order) => order.queueStatus === "waitlist").length,
-    takeaway: orders.filter((order) => order.type === "takeaway").length,
-    done: orders.filter((order) => order.queueStatus === "done").length,
-  }), [orders]);
+  const visibleOrders = useMemo(
+    () => orders.filter((order) => orderMatches(searchQuery, order)),
+    [orders, searchQuery],
+  );
 
   return (
     <section className={styles.page}>
       <header className={styles.header}>
         <h1>Order Line</h1>
-        <div className={styles.filters}>
-          {filterOptions.map((option) => (
-            <button
-              key={option.key}
-              className={`${styles.filterButton} ${activeFilter === option.key ? styles.filterButtonActive : ""}`}
-              onClick={() => setActiveFilter(option.key)}
-              type="button"
-            >
-              <span>{option.label}</span>
-              <strong>{counts[option.key]}</strong>
-            </button>
-          ))}
-        </div>
       </header>
 
       {error ? <p className={styles.error}>{error}</p> : null}
 
       <div className={styles.grid}>
-        {orders.map((order) => {
-          const image = resolveAssetSource(order.items[0]?.imageSource);
-          const dimmed = !orderMatches(searchQuery, order);
+        {visibleOrders.map((order) => {
+          const tone = ticketTone(order);
+          const badge = badgeLines(order);
+          const orderCode = order.publicOrderId.replace("ORD-", "# ");
+
           return (
-            <article key={order._id} className={`${styles.card} ${dimmed ? styles.dimmed : ""}`}>
+            <article key={order._id} className={`${styles.card} ${styles[tone]}`}>
               <div className={styles.cardTop}>
-                <div>
-                  <span className={styles.meta}>{timeLabel(order.createdAt)}</span>
-                  <h2>{order.type === "dineIn" ? `Table ${String(order.tableNumber || "").padStart(2, "0")}` : "Takeaway"}</h2>
-                  <p>{order.publicOrderId}</p>
+                <div className={styles.orderMeta}>
+                  <span className={styles.orderCode}>{orderCode}</span>
+                  <span className={styles.orderTime}>{timeLabel(order.createdAt)}</span>
                 </div>
-                <span className={`${styles.badge} ${styles[order.queueStatus]}`}>
-                  {order.queueStatus === "waitlist" ? "Wait list" : order.type === "dineIn" ? "Dine in" : "Take away"}
+                <span className={styles.badge}>
+                  <strong>{badge.primary}</strong>
+                  <span>{badge.secondary}</span>
                 </span>
               </div>
 
-              <div className={styles.imageWrap}>
-                <img alt={order.items[0]?.name} src={image} />
+              <div className={styles.cardSummary}>
+                <h2>
+                  {order.type === "dineIn"
+                    ? `Table ${String(order.tableNumber || "").padStart(2, "0")}`
+                    : "Take Away"}
+                </h2>
+                <p>{order.itemCount} item{order.itemCount === 1 ? "" : "s"}</p>
+              </div>
+
+              <div className={styles.ticket}>
+                {order.items.slice(0, 3).map((item) => (
+                  <div key={item.menuItemId} className={styles.ticketRow}>
+                    <span>1 x</span>
+                    <span>{item.name}</span>
+                  </div>
+                ))}
               </div>
 
               <div className={styles.cardBottom}>
-                <div>
-                  <strong>{buildItemCountLabel(order.itemCount)}</strong>
-                  <span>{order.customer.name}</span>
-                </div>
-                <div>
-                  <strong>{order.remainingMinutes} min</strong>
-                  <span>{formatCurrency(order.totalAmount)}</span>
-                </div>
+                <span className={styles.customer}>{order.customer.name}</span>
+                <span className={styles.total}>{formatCurrency(order.totalAmount)}</span>
+              </div>
+
+              <div className={styles.cardFooter}>
+                <span className={`${styles.statePill} ${styles[`state${tone[0].toUpperCase()}${tone.slice(1)}`]}`}>
+                  {footerLabel(order)}
+                </span>
               </div>
             </article>
           );

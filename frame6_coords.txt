@@ -1,0 +1,13 @@
+Foodies Menu:	 x=26	 y=20	 w=97	 h=27
+Background:	 x=26	 y=67	 w=263	 h=140
+Frame 627190:	 x=76	 y=110	 w=162	 h=55
+Background:	 x=357	 y=67	 w=263	 h=140
+Background:	 x=688	 y=67	 w=263	 h=140
+Background:	 x=1019	 y=67	 w=263	 h=140
+Frame 627188:	 x=406	 y=109	 w=166	 h=55
+Frame 627186:	 x=737	 y=109	 w=166	 h=55
+Frame 627178:	 x=447	 y=255	 w=411	 h=368
+Frame 627179:	 x=869	 y=255	 w=417	 h=368
+Frame 627177:	 x=26	 y=255	 w=417	 h=368
+Frame 627184:	 x=1067	 y=109	 w=168	 h=55
+table:	 x=26	 y=671	 w=1253	 h=222

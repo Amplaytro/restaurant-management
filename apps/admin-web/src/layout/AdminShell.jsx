@@ -1,4 +1,4 @@
-import { useDeferredValue, useState } from "react";
+import { useDeferredValue, useEffect, useRef, useState } from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import styles from "./AdminShell.module.css";
 
@@ -7,6 +7,15 @@ const navItems = [
   { to: "/tables", label: "Tables", icon: "seat" },
   { to: "/order-line", label: "Order Line", icon: "receipt" },
   { to: "/menu", label: "Menu", icon: "bars" },
+];
+
+const filterSuggestions = [
+  "chef",
+  "revenue",
+  "orders",
+  "tables",
+  "clients",
+  "order summary",
 ];
 
 function BrandMark() {
@@ -19,55 +28,118 @@ function BrandMark() {
   );
 }
 
+import navDashboard from "../assets/nav-dashboard.svg";
+import navSeat from "../assets/nav-seat.svg";
+import navReceipt from "../assets/nav-receipt.svg";
+import navBars from "../assets/nav-bars.svg";
+
 function NavIcon({ type }) {
   if (type === "grid") {
-    return (
-      <span className={styles.iconGrid}>
-        <i />
-        <i />
-        <i />
-        <i />
-      </span>
-    );
+    return <img src={navDashboard} alt="Dashboard" className={styles.navIconImg} />;
   }
 
   if (type === "seat") {
-    return (
-      <span className={styles.iconSeat}>
-        <i />
-        <i />
-      </span>
-    );
+    return <img src={navSeat} alt="Tables" className={styles.navIconImg} />;
   }
 
   if (type === "receipt") {
-    return (
-      <span className={styles.iconReceipt}>
-        <i />
-        <i />
-        <i />
-      </span>
-    );
+    return <img src={navReceipt} alt="Orders" className={styles.navIconImg} />;
   }
 
-  return (
-    <span className={styles.iconBars}>
-      <i />
-      <i />
-      <i />
-    </span>
-  );
+  return <img src={navBars} alt="Menu" className={styles.navIconImg} />;
 }
 
 export function AdminShell() {
   const [query, setQuery] = useState("");
+  const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
   const deferredQuery = useDeferredValue(query);
   const location = useLocation();
+  const filterRef = useRef(null);
+  const isDashboardRoute = location.pathname === "/";
+
+  useEffect(() => {
+    function handlePointerDown(event) {
+      if (filterRef.current && !filterRef.current.contains(event.target)) {
+        setIsFilterMenuOpen(false);
+      }
+    }
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    return () => document.removeEventListener("pointerdown", handlePointerDown);
+  }, []);
+
+  useEffect(() => {
+    setIsFilterMenuOpen(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (!isDashboardRoute && query) {
+      setQuery("");
+    }
+  }, [isDashboardRoute, query]);
 
   return (
     <div className={styles.page}>
+      <BrandMark />
+      
+      <header className={styles.header}>
+        {isDashboardRoute ? (
+          <div className={styles.searchWrap} ref={filterRef}>
+            <div className={styles.searchShell}>
+              <div className={styles.logo}>
+                <span>F</span>
+              </div>
+              <input
+                aria-label="Filter"
+                className={styles.searchInput}
+                onChange={(event) => setQuery(event.target.value)}
+                onFocus={() => setIsFilterMenuOpen(true)}
+                placeholder="Filter..."
+                value={query}
+              />
+              <button
+                aria-expanded={isFilterMenuOpen}
+                aria-haspopup="listbox"
+                aria-label="Open filter suggestions"
+                className={styles.searchArrow}
+                onClick={() => setIsFilterMenuOpen((current) => !current)}
+                type="button"
+              >
+                <span />
+              </button>
+            </div>
+            {isFilterMenuOpen ? (
+              <div className={styles.filterMenu} role="listbox" aria-label="Filter suggestions">
+                {filterSuggestions.map((suggestion) => (
+                  <button
+                    key={suggestion}
+                    className={styles.filterOption}
+                    onClick={() => {
+                      setQuery(suggestion);
+                      setIsFilterMenuOpen(false);
+                    }}
+                    type="button"
+                  >
+                    {suggestion}
+                  </button>
+                ))}
+                <button
+                  className={styles.filterOptionMuted}
+                  onClick={() => {
+                    setQuery("");
+                    setIsFilterMenuOpen(false);
+                  }}
+                  type="button"
+                >
+                  Clear filter
+                </button>
+              </div>
+            ) : null}
+          </div>
+        ) : null}
+      </header>
+
       <aside className={styles.sidebar}>
-        <BrandMark />
         <nav className={styles.nav}>
           {navItems.map((item) => (
             <NavLink
@@ -87,29 +159,14 @@ export function AdminShell() {
         </button>
       </aside>
 
-      <div className={styles.contentArea}>
-        <header className={styles.header}>
-          <div className={styles.searchShell}>
-            <div className={styles.logo}>
-              <span>F</span>
-            </div>
-            <input
-              aria-label="Filter"
-              className={styles.searchInput}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Filter..."
-              value={query}
-            />
-            <div className={styles.searchArrow}>
-              <span />
-            </div>
-          </div>
-        </header>
-
-        <main className={styles.panel}>
-          <Outlet context={{ searchQuery: deferredQuery, pathname: location.pathname }} />
-        </main>
-      </div>
+      <main className={styles.panel}>
+        <Outlet
+          context={{
+            searchQuery: isDashboardRoute ? deferredQuery : "",
+            pathname: location.pathname,
+          }}
+        />
+      </main>
     </div>
   );
 }

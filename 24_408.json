@@ -1,0 +1,47 @@
+[
+  {
+    "id": "24:408",
+    "name": "Image",
+    "type": "RECTANGLE",
+    "scrollBehavior": "SCROLLS",
+    "blendMode": "PASS_THROUGH",
+    "fills": [
+      {
+        "blendMode": "NORMAL",
+        "type": "SOLID",
+        "color": {
+          "r": 0.9411764740943909,
+          "g": 0.9607843160629272,
+          "b": 0.9529411792755127,
+          "a": 1
+        }
+      }
+    ],
+    "strokes": [],
+    "strokeWeight": 1,
+    "strokeAlign": "INSIDE",
+    "cornerRadius": 50,
+    "cornerSmoothing": 0,
+    "absoluteBoundingBox": {
+      "x": 4663,
+      "y": 952,
+      "width": 50,
+      "height": 50
+    },
+    "absoluteRenderBounds": {
+      "x": 4663,
+      "y": 952,
+      "width": 50,
+      "height": 50
+    },
+    "constraints": {
+      "vertical": "BOTTOM",
+      "horizontal": "RIGHT"
+    },
+    "effects": [],
+    "interactions": [],
+    "complexStrokeProperties": {
+      "strokeType": "BASIC"
+    }
+  }
+]

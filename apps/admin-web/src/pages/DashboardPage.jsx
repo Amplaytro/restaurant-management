@@ -2,6 +2,11 @@ import { formatCurrency } from "@final-evaluation/shared";
 import { useEffect, useMemo, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import { adminApi } from "../api/client.js";
+import chefIcon from "../assets/chef-icon.png";
+import revenueIcon from "../assets/revenue-icon.png";
+import ordersIcon from "../assets/orders-icon.png";
+import clientsIcon from "../assets/clients-icon.png";
+import pillBg from "../assets/pill-bg.png";
 import styles from "./DashboardPage.module.css";
 
 function isDimmed(query, ...values) {
@@ -11,6 +16,10 @@ function isDimmed(query, ...values) {
 
   const haystack = values.join(" ").toLowerCase();
   return !haystack.includes(query.toLowerCase());
+}
+
+function joinSearchValues(...values) {
+  return values.flat(Infinity).filter(Boolean).join(" ");
 }
 
 function buildChartPath(points, width, height) {
@@ -30,42 +39,28 @@ function buildChartPath(points, width, height) {
     .join(" ");
 }
 
-const iconMap = {
-  "TOTAL CHEF": (
-    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 7.08 0A5.11 5.11 0 0 1 16.59 6 4 4 0 0 1 18 13.87V21H6Z" />
-      <line x1="6" y1="17" x2="18" y2="17" />
-    </svg>
-  ),
-  "TOTAL REVENUE": (
-    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-      <line x1="12" y1="2" x2="12" y2="22" />
-      <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-    </svg>
-  ),
-  "TOTAL ORDERS": (
-    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
-      <line x1="3" y1="6" x2="21" y2="6" />
-      <path d="M16 10a4 4 0 0 1-8 0" />
-    </svg>
-  ),
-  "TOTAL CLIENTS": (
-    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-      <circle cx="9" cy="7" r="4" />
-      <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-    </svg>
-  )
+const ICON_MAP = {
+  accentLight: chefIcon,
+  accentBlue: revenueIcon,
+  accentMint: ordersIcon,
+  accentSky: clientsIcon,
 };
 
 function StatCard({ label, value, accent, dimmed }) {
   return (
     <article className={`${styles.statCard} ${dimmed ? styles.dimmed : ""}`}>
-      <div className={`${styles.statIcon} ${styles[accent]}`}>
-        {iconMap[label] || <span />}
-      </div>
+      {accent === "accentBlue" ? (
+        <div className={styles.layeredIcon}>
+          <img src={pillBg} alt="" className={styles.layeredBg} />
+          <img src={ICON_MAP[accent]} alt={label} className={styles.layeredFg} />
+        </div>
+      ) : (
+        <img
+          className={styles.statIcon}
+          src={ICON_MAP[accent]}
+          alt={label}
+        />
+      )}
       <div>
         <strong>{value}</strong>
         <span>{label}</span>
@@ -128,7 +123,30 @@ export function DashboardPage() {
     { label: "TOTAL ORDERS", value: String(summary.stats.totalOrders).padStart(2, "0"), accent: "accentMint" },
     { label: "TOTAL CLIENTS", value: String(summary.stats.totalClients).padStart(2, "0"), accent: "accentSky" },
   ];
-
+  const orderSummarySearch = joinSearchValues(
+    "Order Summary",
+    "Served",
+    "Dine In",
+    "Take Away",
+    summary.orderSummary.served,
+    summary.orderSummary.dineIn,
+    summary.orderSummary.takeaway,
+    breakdown.map((item) => `${item.label} ${item.count}`),
+  );
+  const revenueSearch = joinSearchValues(
+    "Revenue",
+    "Daily",
+    "Weekly",
+    "Monthly",
+    "Yearly",
+    revenue.map((point) => `${point.label} ${point.value}`),
+  );
+  const tablesSearch = joinSearchValues(
+    "Tables",
+    "Reserved",
+    "Available",
+    summary.tablesPreview.map((table) => `Table ${table.number} ${table.capacity} ${table.name}`),
+  );
   return (
     <section className={styles.page}>
       <h1 className={styles.title}>Analytics</h1>
@@ -146,7 +164,7 @@ export function DashboardPage() {
       </div>
 
       <div className={styles.insightsGrid}>
-        <article className={styles.panelCard}>
+        <article className={`${styles.panelCard} ${isDimmed(searchQuery, orderSummarySearch) ? styles.dimmed : ""}`}>
           <header className={styles.cardHeader}>
             <div>
               <h2>Order Summary</h2>
@@ -160,15 +178,15 @@ export function DashboardPage() {
           </header>
 
           <div className={styles.summaryStats}>
-            <div className={`${styles.summaryMetric} ${isDimmed(searchQuery, "served", summary.orderSummary.served) ? styles.dimmed : ""}`}>
+            <div className={styles.summaryMetric}>
               <strong>{String(summary.orderSummary.served).padStart(2, "0")}</strong>
               <span>Served</span>
             </div>
-            <div className={`${styles.summaryMetric} ${isDimmed(searchQuery, "dine in", summary.orderSummary.dineIn) ? styles.dimmed : ""}`}>
+            <div className={styles.summaryMetric}>
               <strong>{String(summary.orderSummary.dineIn).padStart(2, "0")}</strong>
               <span>Dine In</span>
             </div>
-            <div className={`${styles.summaryMetric} ${isDimmed(searchQuery, "take away", summary.orderSummary.takeaway) ? styles.dimmed : ""}`}>
+            <div className={styles.summaryMetric}>
               <strong>{String(summary.orderSummary.takeaway).padStart(2, "0")}</strong>
               <span>Take Away</span>
             </div>
@@ -187,7 +205,7 @@ export function DashboardPage() {
                 return (
                   <div
                     key={item.key}
-                    className={`${styles.breakdownRow} ${isDimmed(searchQuery, item.label, item.count) ? styles.dimmed : ""}`}
+                    className={styles.breakdownRow}
                   >
                     <span>{item.label}</span>
                     <em>({percentage}%)</em>
@@ -208,7 +226,7 @@ export function DashboardPage() {
           </div>
         </article>
 
-        <article className={styles.panelCard}>
+        <article className={`${styles.panelCard} ${isDimmed(searchQuery, revenueSearch) ? styles.dimmed : ""}`}>
           <header className={styles.cardHeader}>
             <div>
               <h2>Revenue</h2>
@@ -239,7 +257,7 @@ export function DashboardPage() {
           </div>
         </article>
 
-        <article className={styles.panelCard}>
+        <article className={`${styles.panelCard} ${isDimmed(searchQuery, tablesSearch) ? styles.dimmed : ""}`}>
           <header className={styles.cardHeader}>
             <div>
               <h2>Tables</h2>
@@ -255,9 +273,7 @@ export function DashboardPage() {
             {summary.tablesPreview.map((table) => (
               <div
                 key={table.id}
-                className={`${styles.tableCell} ${table.isReserved ? styles.tableCellReserved : ""} ${
-                  isDimmed(searchQuery, `table ${table.number}`, table.capacity, table.name) ? styles.dimmed : ""
-                }`}
+                className={`${styles.tableCell} ${table.isReserved ? styles.tableCellReserved : ""}`}
               >
                 <span>Table</span>
                 <strong>{String(table.number).padStart(2, "0")}</strong>
@@ -273,10 +289,7 @@ export function DashboardPage() {
           <span>Order Taken</span>
         </div>
         {summary.chefsTable.map((chef) => (
-          <div
-            key={chef.id}
-            className={`${styles.tableRow} ${isDimmed(searchQuery, chef.name, chef.orderTaken) ? styles.dimmed : ""}`}
-          >
+          <div key={chef.id} className={styles.tableRow}>
             <span>{chef.name}</span>
             <strong>{String(chef.orderTaken).padStart(2, "0")}</strong>
           </div>

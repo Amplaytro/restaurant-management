@@ -1,33 +1,38 @@
 .page {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
+  display: grid;
+  grid-template-rows: auto minmax(100px, 0.17fr) minmax(0, 0.49fr) minmax(170px, 0.34fr);
+  gap: clamp(12px, 2vh, 24px);
   height: 100%;
+  min-height: 0;
 }
 
 .title {
   margin: 0;
-  font-size: 34px;
+  font-size: clamp(30px, 2.25vw, 34px);
   font-weight: 600;
   color: #5b5d5c;
+  line-height: 1;
 }
 
 .statsGrid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 18px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: clamp(18px, 1.9vw, 30px);
+  min-height: 0;
 }
 
 .statCard {
   background: var(--color-panel-soft);
   border: 1px solid var(--color-border);
   border-radius: 9px;
-  min-height: 104px;
-  padding: 22px 28px;
+  padding: 0 24px;
   display: flex;
   align-items: center;
-  gap: 18px;
+  gap: 16px;
+  box-sizing: border-box;
   transition: filter 180ms ease, opacity 180ms ease;
+  height: 100%;
+  min-height: 0;
 }
 
 .statCard strong {
@@ -44,44 +49,43 @@
 }
 
 .statIcon {
-  width: 58px;
-  height: 58px;
-  border-radius: 999px;
-  display: grid;
-  place-items: center;
+  width: 76px;
+  height: 55px;
+  flex-shrink: 0;
+  object-fit: contain;
 }
 
-.statIcon span {
-  width: 22px;
-  height: 22px;
-  border-radius: 999px;
-  border: 3px solid #1d1d1d;
+.layeredIcon {
+  position: relative;
+  width: 76px;
+  height: 55px;
+  flex-shrink: 0;
 }
 
-.accentLight {
-  background: #e4edf8;
-  color: #3b82f6;
+.layeredBg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
-.accentBlue {
-  background: #e1ecfb;
-  color: #6366f1;
-}
-
-.accentMint {
-  background: #e5f1f4;
-  color: #0d9488;
-}
-
-.accentSky {
-  background: #e4edf9;
-  color: #0ea5e9;
+.layeredFg {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 20px; 
+  height: auto;
+  object-fit: contain;
 }
 
 .insightsGrid {
   display: grid;
-  grid-template-columns: 1.08fr 1.08fr 1fr;
-  gap: 10px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.98fr) minmax(0, 1fr);
+  gap: clamp(14px, 1.6vw, 24px);
+  min-height: 0;
 }
 
 .panelCard {
@@ -89,10 +93,14 @@
   border-radius: 8px;
   background: var(--color-panel-soft);
   overflow: hidden;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
 .cardHeader {
-  padding: 14px 16px;
+  padding: 14px 16px 12px;
   display: flex;
   justify-content: space-between;
   gap: 12px;
@@ -123,8 +131,8 @@
 .summaryStats {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
-  padding: 14px 14px 6px;
+  gap: 12px;
+  padding: 14px 14px 8px;
 }
 
 .summaryMetric {
@@ -151,9 +159,10 @@
 .breakdownArea {
   display: grid;
   grid-template-columns: 92px 1fr;
-  padding: 16px 18px 18px;
+  padding: 12px 18px 16px;
   gap: 12px;
   align-items: center;
+  min-height: 0;
 }
 
 .donutWrap {
@@ -210,7 +219,8 @@
 
 .chartSurface {
   position: relative;
-  padding: 10px 12px 16px;
+  padding: 8px 12px 14px;
+  min-height: 0;
 }
 
 .chartColumns {
@@ -228,7 +238,7 @@
 
 .chartSvg {
   width: 100%;
-  height: 170px;
+  height: clamp(136px, 18vh, 170px);
   position: relative;
   z-index: 1;
 }
@@ -271,17 +281,23 @@
 }
 
 .tablesGrid {
-  padding: 16px;
+  padding: 14px;
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
-  gap: 8px;
+  gap: 7px;
+  min-height: 0;
+  flex: 1;
+  align-content: start;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
 }
 
 .tableCell {
   border: 1px solid #cfd6d3;
   background: white;
   border-radius: 2px;
-  padding: 6px 4px;
+  padding: 5px 4px;
   text-align: center;
 }
 
@@ -310,13 +326,18 @@
   border-radius: 9px;
   overflow: hidden;
   border: 1px solid #e2e6e4;
+  display: grid;
+  grid-template-rows: repeat(5, minmax(0, 1fr));
+  min-height: 0;
 }
 
 .tableHead,
 .tableRow {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  padding: 16px 22px;
+  padding: 0 22px;
+  align-items: center;
+  min-height: 0;
 }
 
 .tableHead {
@@ -344,8 +365,59 @@
 }
 
 @media (max-width: 1200px) {
+  .page {
+    grid-template-rows: auto auto auto auto;
+  }
+
   .statsGrid,
   .insightsGrid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-height: 900px) {
+  .page {
+    grid-template-rows: auto minmax(90px, 0.16fr) minmax(0, 0.48fr) minmax(156px, 0.32fr);
+    gap: 12px;
+  }
+
+  .cardHeader h2 {
+    font-size: 21px;
+  }
+
+  .cardHeader p,
+  .summaryMetric span,
+  .breakdownRow,
+  .chartLabels,
+  .legend {
+    font-size: 11px;
+  }
+
+  .summaryMetric {
+    min-height: 66px;
+  }
+
+  .summaryMetric strong {
+    font-size: 24px;
+  }
+
+  .breakdownArea {
+    grid-template-columns: 76px 1fr;
+    padding-top: 10px;
+  }
+
+  .donut {
+    width: 64px;
+    height: 64px;
+  }
+
+  .donutInner {
+    width: 38px;
+    height: 38px;
+  }
+
+  .tableHead,
+  .tableRow {
+    padding: 0 18px;
   }
 }
