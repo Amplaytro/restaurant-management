@@ -101,7 +101,8 @@ apiRouter.get("/menu/items", async (req, res, next) => {
         category: req.query.category,
         search: req.query.search,
         page: req.query.page,
-        limit: req.query.limit
+        limit: req.query.limit,
+        includeInactive: req.query.includeInactive === "true"
       })
     );
   } catch (error) {

@@ -18,6 +18,13 @@ const filterSuggestions = [
   "order summary",
 ];
 
+const pageTitles = {
+  "/": "Dashboard",
+  "/tables": "Tables",
+  "/order-line": "Order Line",
+  "/menu": "Menu",
+};
+
 function BrandMark() {
   return (
     <div className={styles.brandMark}>
@@ -27,6 +34,7 @@ function BrandMark() {
     </div>
   );
 }
+
 
 import navDashboard from "../assets/nav-dashboard.svg";
 import navSeat from "../assets/nav-seat.svg";
@@ -56,6 +64,8 @@ export function AdminShell() {
   const location = useLocation();
   const filterRef = useRef(null);
   const isDashboardRoute = location.pathname === "/";
+  const isDesktop7MenuRoute = location.pathname === "/menu";
+  const pageTitle = pageTitles[location.pathname] ?? "";
 
   useEffect(() => {
     function handlePointerDown(event) {
@@ -77,6 +87,19 @@ export function AdminShell() {
       setQuery("");
     }
   }, [isDashboardRoute, query]);
+
+  if (isDesktop7MenuRoute) {
+    return (
+      <div className={styles.desktop7Shell}>
+        <Outlet
+          context={{
+            searchQuery: "",
+            pathname: location.pathname,
+          }}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className={styles.page}>
@@ -136,7 +159,9 @@ export function AdminShell() {
               </div>
             ) : null}
           </div>
-        ) : null}
+        ) : (
+          <h1 className={styles.pageTitle}>{pageTitle}</h1>
+        )}
       </header>
 
       <aside className={styles.sidebar}>

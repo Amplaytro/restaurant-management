@@ -16,6 +16,7 @@
     "seed": "npm run seed -w @final-evaluation/api"
   },
   "devDependencies": {
-    "concurrently": "^9.2.1"
+    "concurrently": "^9.2.1",
+    "playwright": "^1.58.2"
   }
 }

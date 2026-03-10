@@ -1,203 +1,323 @@
 import { resolveAssetSource } from "@final-evaluation/assets";
-import { useEffect, useMemo, useState } from "react";
-import { useOutletContext } from "react-router-dom";
+import { formatCurrency } from "@final-evaluation/shared";
+import { useEffect, useState } from "react";
+import { NavLink } from "react-router-dom";
 import { adminApi } from "../api/client.js";
+import desktop7MenuSvg from "../assets/desktop7-menu.svg";
+import menuImageIcon from "../assets/menu-image-icon.svg";
+import navDashboard from "../assets/nav-dashboard.svg";
+import navSeat from "../assets/nav-seat.svg";
+import navReceipt from "../assets/nav-receipt.svg";
+import navBars from "../assets/nav-bars.svg";
 import styles from "./MenuPage.module.css";
+import shellStyles from "../layout/AdminShell.module.css";
 
-const initialForm = {
+const initialFormState = {
   name: "",
   description: "",
+  prepTime: "",
   price: "",
-  averagePreparationTime: "",
-  category: "",
-  stock: "",
 };
 
-function matchesSearch(query, item) {
-  if (!query) {
-    return true;
-  }
+function MenuCard({ item }) {
+  return (
+    <article className={`${styles.menuCard} ${!item.isActive ? styles.menuCardInactive : ""}`}>
+      <div className={styles.menuCardImageWrap}>
+        {item.imageSource ? (
+          <img
+            alt={item.name}
+            className={styles.menuCardImage}
+            src={resolveAssetSource(item.imageSource)}
+          />
+        ) : (
+          <img alt="" aria-hidden="true" className={styles.menuCardFallbackIcon} src={menuImageIcon} />
+        )}
+      </div>
 
-  return `${item.name} ${item.description}`.toLowerCase().includes(query.toLowerCase());
+      <div className={styles.menuCardBody}>
+        <div className={styles.menuCardTitleRow}>
+          <h3 className={styles.menuCardTitle}>{item.name}</h3>
+          {!item.isActive ? <span className={styles.menuCardStatus}>Inactive</span> : null}
+        </div>
+        <p className={styles.menuCardDescription}>{item.description}</p>
+        <div className={styles.menuCardMeta}>
+          <span>{formatCurrency(item.price)}</span>
+          <span>{item.averagePreparationTime} min</span>
+        </div>
+      </div>
+    </article>
+  );
 }
 
 export function MenuPage() {
-  const { searchQuery } = useOutletContext();
-  const [categories, setCategories] = useState([]);
-  const [items, setItems] = useState([]);
-  const [form, setForm] = useState(initialForm);
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [editingId, setEditingId] = useState("");
+  const [menuItem, setMenuItem] = useState(initialFormState);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [imagePreviewUrl, setImagePreviewUrl] = useState("");
+  const [menuItems, setMenuItems] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [desktopScale, setDesktopScale] = useState(1);
+  const desktopPanelScale = desktopScale > 1 ? 1 / desktopScale : 1;
 
-  async function loadData() {
+  useEffect(() => {
+    function syncDesktopScale() {
+      if (window.innerWidth <= 1100) {
+        setDesktopScale(1);
+        return;
+      }
+
+      const nextScale = window.innerWidth / 1440;
+      setDesktopScale(nextScale);
+    }
+
+    syncDesktopScale();
+    window.addEventListener("resize", syncDesktopScale);
+
+    return () => window.removeEventListener("resize", syncDesktopScale);
+  }, []);
+
+  useEffect(() => {
+    if (!selectedImage) {
+      setImagePreviewUrl("");
+      return undefined;
+    }
+
+    const previewUrl = URL.createObjectURL(selectedImage);
+    setImagePreviewUrl(previewUrl);
+
+    return () => URL.revokeObjectURL(previewUrl);
+  }, [selectedImage]);
+
+  async function loadMenuItems() {
     try {
-      const [categoryResponse, itemResponse] = await Promise.all([
-        adminApi.getCategories(),
-        adminApi.getMenuItems({ limit: 32 }),
-      ]);
-
-      setCategories(categoryResponse);
-      setItems(itemResponse.items);
-      setForm((current) => ({
-        ...current,
-        category: current.category || categoryResponse[0]?.slug || "",
-      }));
-      setLoading(false);
+      setIsLoading(true);
+      const payload = await adminApi.getMenuItems({ limit: 100, includeInactive: true });
+      setMenuItems(payload.items);
+      setError("");
     } catch (requestError) {
       setError(requestError.message);
-      setLoading(false);
+    } finally {
+      setIsLoading(false);
     }
   }
 
   useEffect(() => {
-    loadData();
+    loadMenuItems();
   }, []);
 
-  const previewUrl = useMemo(() => {
-    if (selectedFile) {
-      return URL.createObjectURL(selectedFile);
-    }
-
-    if (editingId) {
-      const editingItem = items.find((item) => item._id === editingId);
-      return resolveAssetSource(editingItem?.imageSource);
-    }
-
-    return "";
-  }, [editingId, items, selectedFile]);
-
-  useEffect(
-    () => () => {
-      if (selectedFile && previewUrl.startsWith("blob:")) {
-        URL.revokeObjectURL(previewUrl);
-      }
-    },
-    [previewUrl, selectedFile],
-  );
-
-  function handleChange(event) {
+  function handleFieldChange(event) {
     const { name, value } = event.target;
-    setForm((current) => ({ ...current, [name]: value }));
+    setMenuItem((current) => ({
+      ...current,
+      [name]: value,
+    }));
+  }
+
+  function handleImageChange(event) {
+    setSelectedImage(event.target.files?.[0] ?? null);
   }
 
   async function handleSubmit(event) {
     event.preventDefault();
 
     try {
+      setIsSaving(true);
       const payload = new FormData();
-      Object.entries(form).forEach(([key, value]) => payload.append(key, value));
-      if (selectedFile) {
-        payload.append("image", selectedFile);
+      payload.append("name", menuItem.name.trim());
+      payload.append("description", menuItem.description.trim());
+      payload.append("price", menuItem.price.trim());
+      payload.append("averagePreparationTime", menuItem.prepTime.trim());
+
+      if (selectedImage) {
+        payload.append("image", selectedImage);
       }
 
-      await adminApi.saveMenuItem(payload, editingId || undefined);
-      setForm({ ...initialForm, category: categories[0]?.slug || "" });
-      setSelectedFile(null);
-      setEditingId("");
+      await adminApi.saveMenuItem(payload);
+
+      setMenuItem(initialFormState);
+      setSelectedImage(null);
       setError("");
-      await loadData();
+      await loadMenuItems();
     } catch (requestError) {
       setError(requestError.message);
+    } finally {
+      setIsSaving(false);
     }
-  }
-
-  function startEdit(item) {
-    const category = categories.find((entry) => entry._id === item.categoryId);
-    setEditingId(item._id);
-    setForm({
-      name: item.name,
-      description: item.description,
-      price: String(item.price),
-      averagePreparationTime: String(item.averagePreparationTime),
-      category: category?.slug || categories[0]?.slug || "",
-      stock: String(item.stock),
-    });
-    setSelectedFile(null);
-  }
-
-  async function handleDelete(itemId) {
-    try {
-      await adminApi.deleteMenuItem(itemId);
-      await loadData();
-    } catch (requestError) {
-      setError(requestError.message);
-    }
-  }
-
-  if (loading) {
-    return <p className={styles.loading}>Loading menu…</p>;
   }
 
   return (
-    <section className={styles.page}>
-      <div className={styles.formCard}>
-        <div className={styles.uploadPreview}>
-          {previewUrl ? <img alt="Preview" src={previewUrl} /> : <span>Drop image here</span>}
-        </div>
-        <form className={styles.form} onSubmit={handleSubmit}>
-          <input name="name" onChange={handleChange} placeholder="Name" value={form.name} />
-          <textarea
-            name="description"
-            onChange={handleChange}
-            placeholder="Description"
-            rows="4"
-            value={form.description}
-          />
-          <input name="price" onChange={handleChange} placeholder="Price" type="number" value={form.price} />
-          <input
-            name="averagePreparationTime"
-            onChange={handleChange}
-            placeholder="Average prep time"
-            type="number"
-            value={form.averagePreparationTime}
-          />
-          <select name="category" onChange={handleChange} value={form.category}>
-            {categories.map((category) => (
-              <option key={category._id} value={category.slug}>
-                {category.name}
-              </option>
-            ))}
-          </select>
-          <input name="stock" onChange={handleChange} placeholder="Stock" type="number" value={form.stock} />
-          <input accept="image/*" onChange={(event) => setSelectedFile(event.target.files?.[0] || null)} type="file" />
-          <button type="submit">{editingId ? "Update Item" : "Save Item"}</button>
-        </form>
-        {error ? <p className={styles.error}>{error}</p> : null}
-      </div>
+    <div className={styles.desktop7Page}>
+      <div
+        className={styles.desktop7Stage}
+        style={{
+          "--desktop-scale": String(desktopScale),
+          "--desktop-panel-scale": String(desktopPanelScale),
+        }}
+      >
+        <div className={styles.desktop7Canvas}>
+          <img className={styles.desktop7Image} alt="Menu page (Desktop7)" src={desktop7MenuSvg} />
 
-      <div className={styles.listCard}>
-        <header className={styles.listHeader}>
-          <h1>Foodies Menu</h1>
-          <p>{items.length} active dishes</p>
-        </header>
-        <div className={styles.list}>
-          {items.map((item) => (
-            <article
-              key={item._id}
-              className={`${styles.menuItem} ${!matchesSearch(searchQuery, item) ? styles.dimmed : ""}`}
-            >
-              <img alt={item.name} src={resolveAssetSource(item.imageSource)} />
-              <div className={styles.menuBody}>
-                <strong>{item.name}</strong>
-                <p>{item.description}</p>
-                <span>
-                  ₹{item.price} · {item.averagePreparationTime} min · stock {item.stock}
-                </span>
-              </div>
-              <div className={styles.menuActions}>
-                <button onClick={() => startEdit(item)} type="button">
-                  Edit
+          <form className={styles.formOverlay} onSubmit={handleSubmit}>
+            <div className={styles.fieldGroup}>
+              <label className={styles.imageField} htmlFor="menu-image">
+                <input
+                  accept="image/*"
+                  className={styles.imageInput}
+                  id="menu-image"
+                  name="image"
+                  onChange={handleImageChange}
+                  type="file"
+                />
+                {imagePreviewUrl ? (
+                  <img alt="Selected menu item preview" className={styles.imagePreview} src={imagePreviewUrl} />
+                ) : (
+                  <div className={styles.imagePlaceholder}>
+                    <img alt="" aria-hidden="true" className={styles.imagePlaceholderIcon} src={menuImageIcon} />
+                  </div>
+                )}
+              </label>
+            </div>
+
+            <div className={styles.fieldGroup}>
+              <label className={styles.fieldLabel} htmlFor="menu-name">
+                name
+              </label>
+              <input
+                className={styles.fieldInput}
+                id="menu-name"
+                name="name"
+                onChange={handleFieldChange}
+                placeholder="name"
+                required
+                type="text"
+                value={menuItem.name}
+              />
+            </div>
+
+            <div className={styles.fieldGroup}>
+              <label className={styles.fieldLabel} htmlFor="menu-description">
+                description
+              </label>
+              <input
+                className={styles.fieldInput}
+                id="menu-description"
+                name="description"
+                onChange={handleFieldChange}
+                placeholder="description"
+                required
+                type="text"
+                value={menuItem.description}
+              />
+            </div>
+
+            <div className={styles.fieldGroup}>
+              <label className={styles.fieldLabel} htmlFor="menu-price">
+                price
+              </label>
+              <input
+                className={styles.fieldInput}
+                id="menu-price"
+                inputMode="decimal"
+                name="price"
+                onChange={handleFieldChange}
+                placeholder="price"
+                required
+                type="text"
+                value={menuItem.price}
+              />
+            </div>
+
+            <div className={styles.fieldGroup}>
+              <label className={styles.fieldLabel} htmlFor="menu-prep-time">
+                average prep time
+              </label>
+              <input
+                className={styles.fieldInput}
+                id="menu-prep-time"
+                inputMode="numeric"
+                name="prepTime"
+                onChange={handleFieldChange}
+                placeholder="time in minutes"
+                required
+                type="text"
+                value={menuItem.prepTime}
+              />
+            </div>
+
+            {error ? <p className={styles.errorMessage}>{error}</p> : null}
+
+            <button className={styles.submitButton} disabled={isSaving} type="submit">
+              {isSaving ? "Saving..." : "Add New Dish"}
+            </button>
+          </form>
+
+          <aside className={styles.menuPanel}>
+            <div className={styles.menuPanelInner}>
+              {isLoading ? (
+                <p className={styles.panelStatus}>Loading menu items...</p>
+              ) : menuItems.length ? (
+                <div className={styles.menuList}>
+                  {menuItems.map((item) => (
+                    <MenuCard key={item._id} item={item} />
+                  ))}
+                </div>
+              ) : (
+                <p className={styles.panelStatus}>No menu items available.</p>
+              )}
+            </div>
+          </aside>
+
+          <nav className={styles.navOverlay} aria-label="Primary">
+            <div className={styles.menuSidebarWrap}>
+              <aside className={shellStyles.sidebar}>
+                <nav className={shellStyles.nav}>
+                  <NavLink
+                    className={({ isActive }) =>
+                      `${shellStyles.navItem} ${isActive ? shellStyles.navItemActive : ""}`
+                    }
+                    to="/"
+                    aria-label="Dashboard"
+                    end
+                  >
+                    <img src={navDashboard} alt="" className={shellStyles.navIconImg} />
+                  </NavLink>
+                  <NavLink
+                    className={({ isActive }) =>
+                      `${shellStyles.navItem} ${isActive ? shellStyles.navItemActive : ""}`
+                    }
+                    to="/tables"
+                    aria-label="Tables"
+                  >
+                    <img src={navSeat} alt="" className={shellStyles.navIconImg} />
+                  </NavLink>
+                  <NavLink
+                    className={({ isActive }) =>
+                      `${shellStyles.navItem} ${isActive ? shellStyles.navItemActive : ""}`
+                    }
+                    to="/order-line"
+                    aria-label="Order Line"
+                  >
+                    <img src={navReceipt} alt="" className={shellStyles.navIconImg} />
+                  </NavLink>
+                  <NavLink
+                    className={({ isActive }) =>
+                      `${shellStyles.navItem} ${isActive ? shellStyles.navItemActive : ""}`
+                    }
+                    to="/menu"
+                    aria-label="Menu"
+                  >
+                    <img src={navBars} alt="" className={shellStyles.navIconImg} />
+                  </NavLink>
+                </nav>
+                <button className={shellStyles.settingsButton} type="button" aria-label="Settings">
+                  <span className={shellStyles.settingsRing} />
                 </button>
-                <button onClick={() => handleDelete(item._id)} type="button">
-                  Delete
-                </button>
-              </div>
-            </article>
-          ))}
+              </aside>
+            </div>
+          </nav>
         </div>
       </div>
-    </section>
+    </div>
   );
 }

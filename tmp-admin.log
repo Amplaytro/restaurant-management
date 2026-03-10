@@ -1,0 +1,8 @@
+
+> final-evaluation-project@1.0.0 dev:admin
+> npm run dev -w @final-evaluation/admin-web
+
+
+> @final-evaluation/admin-web@0.0.0 dev
+> vite
+

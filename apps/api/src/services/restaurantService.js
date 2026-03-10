@@ -111,6 +111,28 @@ function buildRemainingMinutes(processingEndsAt) {
   return Math.max(0, Math.ceil(diffMs / 60000));
 }
 
+function buildDeliveryRemainingMinutes(order) {
+  if (!order.estimatedDeliveryMinutes) {
+    return 0;
+  }
+
+  const processingEndsAt = new Date(order.processingEndsAt).getTime();
+  const createdAt = new Date(order.createdAt).getTime();
+  const processingDurationMinutes = Math.max(0, Math.ceil((processingEndsAt - createdAt) / 60000));
+  const postProcessingMinutes = Math.max(
+    0,
+    Number(order.estimatedDeliveryMinutes) - processingDurationMinutes,
+  );
+
+  if (processingEndsAt > Date.now()) {
+    return 0;
+  }
+
+  const deliveryEndsAt = processingEndsAt + postProcessingMinutes * 60000;
+  const diffMs = deliveryEndsAt - Date.now();
+  return Math.max(0, Math.ceil(diffMs / 60000));
+}
+
 function shuffle(values) {
   const copy = [...values];
 
@@ -129,6 +151,13 @@ export async function refreshElapsedOrders() {
   });
 
   for (const order of expiredOrders) {
+    if (order.type === "takeaway") {
+      const deliveryRemainingMinutes = buildDeliveryRemainingMinutes(order);
+      order.queueStatus = deliveryRemainingMinutes > 0 ? "served" : "done";
+      await order.save();
+      continue;
+    }
+
     order.queueStatus = "done";
     await order.save();
 
@@ -451,6 +480,9 @@ export async function createTable(payload) {
   }
 
   const count = await Table.countDocuments();
+  if (count >= 30) {
+    throw new Error("Maximum number of tables (30) reached.");
+  }
   return Table.create({
     number: count + 1,
     displayOrder: count + 1,
@@ -508,8 +540,8 @@ export async function getCategories() {
   return MenuCategory.find({ isActive: true }).sort({ sortOrder: 1 });
 }
 
-export async function getMenuItems({ category, search = "", page = 1, limit = 6 }) {
-  const query = { isActive: true };
+export async function getMenuItems({ category, search = "", page = 1, limit = 6, includeInactive = false }) {
+  const query = includeInactive ? {} : { isActive: true };
 
   if (category) {
     const targetCategory = await MenuCategory.findOne({ slug: category });
@@ -522,7 +554,7 @@ export async function getMenuItems({ category, search = "", page = 1, limit = 6 
     query.name = { $regex: search.trim(), $options: "i" };
   }
 
-  const safeLimit = Math.min(12, Math.max(1, Number(limit) || 6));
+  const safeLimit = Math.min(100, Math.max(1, Number(limit) || 6));
   const safePage = Math.max(1, Number(page) || 1);
   const skip = (safePage - 1) * safeLimit;
 
@@ -541,9 +573,15 @@ export async function getMenuItems({ category, search = "", page = 1, limit = 6 
 }
 
 export async function upsertMenuItem(payload, file, menuItemId) {
-  const category = await MenuCategory.findOne({ slug: payload.category });
+  const existingItem = menuItemId ? await MenuItem.findById(menuItemId) : null;
+  const category = payload.category
+    ? await MenuCategory.findOne({ slug: payload.category })
+    : existingItem
+      ? await MenuCategory.findById(existingItem.categoryId)
+      : await MenuCategory.findOne({ isActive: true }).sort({ sortOrder: 1 });
+
   if (!category) {
-    throw new Error("Valid category is required.");
+    throw new Error("At least one active category is required.");
   }
 
   const document = {
@@ -552,11 +590,23 @@ export async function upsertMenuItem(payload, file, menuItemId) {
     price: Number(payload.price),
     averagePreparationTime: Number(payload.averagePreparationTime),
     categoryId: category._id,
-    stock: Number(payload.stock)
+    stock: payload.stock ? Number(payload.stock) : existingItem?.stock ?? 10
   };
 
   if (!document.name || !document.description) {
     throw new Error("Name and description are required.");
+  }
+
+  if (Number.isNaN(document.price) || document.price <= 0) {
+    throw new Error("Price must be greater than 0.");
+  }
+
+  if (Number.isNaN(document.averagePreparationTime) || document.averagePreparationTime <= 0) {
+    throw new Error("Average prep time must be greater than 0.");
+  }
+
+  if (Number.isNaN(document.stock) || document.stock < 0) {
+    throw new Error("Stock must be 0 or greater.");
   }
 
   if (file) {
@@ -752,6 +802,7 @@ export async function getOrders(filter = "all") {
   return orders.map((order) => ({
     ...order,
     remainingMinutes: buildRemainingMinutes(order.processingEndsAt),
+    remainingDeliveryMinutes: buildDeliveryRemainingMinutes(order),
     itemCount: order.items.reduce((sum, item) => sum + item.quantity, 0),
     totalAmount: sumOrderValue(order)
   }));

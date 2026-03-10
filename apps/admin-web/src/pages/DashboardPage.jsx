@@ -147,6 +147,19 @@ export function DashboardPage() {
     "Available",
     summary.tablesPreview.map((table) => `Table ${table.number} ${table.capacity} ${table.name}`),
   );
+  const visibleTables = Array.from({ length: 30 }, (_, index) => {
+    const tableNumber = index + 1;
+    const table = summary.tablesPreview.find((entry) => entry.number === tableNumber);
+
+    return (
+      table || {
+        id: `table-slot-${tableNumber}`,
+        number: tableNumber,
+        isReserved: false,
+      }
+    );
+  });
+
   return (
     <section className={styles.page}>
       <h1 className={styles.title}>Analytics</h1>
@@ -257,28 +270,42 @@ export function DashboardPage() {
           </div>
         </article>
 
-        <article className={`${styles.panelCard} ${isDimmed(searchQuery, tablesSearch) ? styles.dimmed : ""}`}>
-          <header className={styles.cardHeader}>
-            <div>
-              <h2>Tables</h2>
-              <p>Reserved tables remain green while available tables stay white.</p>
-            </div>
-            <div className={styles.legend}>
-              <span><i className={styles.legendReserved} /> Reserved</span>
-              <span><i className={styles.legendAvailable} /> Available</span>
-            </div>
-          </header>
+        <article className={`${styles.tablesPanel} ${isDimmed(searchQuery, tablesSearch) ? styles.dimmed : ""}`}>
+          <div className={styles.tablesGraphic} role="img" aria-label="Tables setup">
+            <div className={styles.tablesBackground} />
+            <div className={styles.tablesDivider} />
 
-          <div className={styles.tablesGrid}>
-            {summary.tablesPreview.map((table) => (
-              <div
-                key={table.id}
-                className={`${styles.tableCell} ${table.isReserved ? styles.tableCellReserved : ""}`}
-              >
-                <span>Table</span>
-                <strong>{String(table.number).padStart(2, "0")}</strong>
+            <div className={styles.tablesHeaderBar}>
+              <div className={styles.tablesHeaderContent}>
+                <h2 className={styles.tablesHeading}>Tables</h2>
+                <p className={styles.tablesSubcopy}>Reserved tables remain green while available tables stay white.</p>
               </div>
-            ))}
+
+              <div className={styles.tablesLegend}>
+                <span className={styles.tablesLegendItem}>
+                  <i className={`${styles.tablesLegendDot} ${styles.tablesLegendDotReserved}`} aria-hidden="true" />
+                  Reserved
+                </span>
+                <span className={styles.tablesLegendItem}>
+                  <i className={`${styles.tablesLegendDot} ${styles.tablesLegendDotAvailable}`} aria-hidden="true" />
+                  Available
+                </span>
+              </div>
+            </div>
+
+            <div className={styles.tablesBookingGrid}>
+              {visibleTables.map((table) => (
+                <div
+                  key={table.id}
+                  className={`${styles.tableBookingCard} ${table.isReserved ? styles.tableBookingReserved : ""}`}
+                >
+                  <span className={styles.tableBookingLabel}>Table</span>
+                  <strong className={styles.tableBookingNumber}>
+                    {String(table.number).padStart(2, "0")}
+                  </strong>
+                </div>
+              ))}
+            </div>
           </div>
         </article>
       </div>

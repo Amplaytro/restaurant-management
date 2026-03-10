@@ -1,218 +1,215 @@
 .page {
-  display: grid;
-  grid-template-rows: auto 1fr;
-  gap: 16px;
+  --ticket-gap: 22px;
+  --ticket-aspect: 1.3360323887;
+  --ticket-width: min(
+    275px,
+    calc((100vw - 280px - (var(--ticket-gap) * 3)) / 4),
+    calc(((100vh - 164px - var(--ticket-gap)) / 2) / var(--ticket-aspect))
+  );
+  --ticket-height: calc(var(--ticket-width) * var(--ticket-aspect));
+  --ticket-grid-width: calc((var(--ticket-width) * 4) + (var(--ticket-gap) * 3));
   height: 100%;
   min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 2px 0 10px;
+  scrollbar-width: thin;
+  scrollbar-color: #a9b2b4 transparent;
 }
 
-.header {
-  display: flex;
-  align-items: flex-end;
-}
-
-.header h1 {
-  margin: 0;
-  font-size: 34px;
-  font-weight: 600;
-  line-height: 1;
-  color: #5d5f5e;
+.error,
+.grid {
+  width: var(--ticket-grid-width);
+  margin: 0 auto;
 }
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(4, 236px);
-  grid-auto-rows: 190px;
+  grid-template-columns: repeat(4, var(--ticket-width));
+  grid-auto-rows: var(--ticket-height);
+  gap: var(--ticket-gap);
   justify-content: center;
+}
+
+.gridCompact {
+  min-height: 100%;
+  align-content: space-between;
+}
+
+.gridOverflow {
   align-content: start;
-  gap: 20px 18px;
-  height: min(400px, 100%);
-  min-height: 0;
-  overflow: auto;
-  padding-right: 4px;
 }
 
-.grid::-webkit-scrollbar {
-  width: 8px;
+.page::-webkit-scrollbar {
+  width: 10px;
 }
 
-.grid::-webkit-scrollbar-thumb {
-  background: #d8deda;
+.page::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.page::-webkit-scrollbar-thumb {
+  background: #a9b2b4;
   border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
 }
 
 .card {
-  border-radius: 18px;
-  padding: 12px;
-  display: grid;
-  grid-template-rows: auto auto 1fr auto auto;
-  gap: 8px;
-  min-height: 0;
-  box-shadow: inset 0 0 0 1px rgba(216, 224, 220, 0.95);
+  position: relative;
+  width: var(--ticket-width);
+  height: var(--ticket-height);
 }
 
-.processing {
-  background: #f7d7a6;
+.cardFrame,
+.cardLayer {
+  position: absolute;
+  inset: 0;
 }
 
-.takeaway {
-  background: #c7d9e0;
+.cardFrame {
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 
-.done {
-  background: #adf2b5;
+.cardLayer {
+  pointer-events: none;
 }
 
-.cardTop {
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-  align-items: flex-start;
-}
-
-.orderMeta {
+.metaPanel {
+  position: absolute;
+  top: 6.67%;
+  left: 20.24%;
+  width: 29.15%;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: max(2px, calc(var(--ticket-height) * 0.0121));
 }
 
 .orderCode {
-  color: #4780d8;
-  font-size: 10px;
+  color: #3181a3;
+  font-size: clamp(10px, calc(var(--ticket-width) * 0.0486), 14px);
   font-weight: 700;
+  line-height: 1.08;
   letter-spacing: 0.02em;
 }
 
-.orderTime {
-  color: #626a67;
-  font-size: 10px;
+.topInfoLine {
+  color: #2c2c2e;
+  font-size: clamp(8px, calc(var(--ticket-width) * 0.0405), 11px);
   font-weight: 500;
-}
-
-.badge {
-  min-width: 58px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.45);
-  padding: 6px 8px 5px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 1px;
-  text-align: right;
-}
-
-.badge strong,
-.badge span {
-  font-size: 8px;
-  line-height: 1.15;
-  color: #727874;
-}
-
-.badge strong {
-  font-weight: 700;
-}
-
-.cardSummary h2 {
-  margin: 0;
-  color: #444948;
-  font-size: 12px;
-  font-weight: 700;
   line-height: 1.15;
 }
 
-.cardSummary p {
-  margin: 2px 0 0;
-  color: #69716e;
-  font-size: 9px;
-  font-weight: 600;
-}
-
-.ticket {
-  background: rgba(255, 255, 255, 0.92);
-  border-radius: 14px;
-  padding: 11px 10px;
+.badgePanel {
+  position: absolute;
+  top: 9.4%;
+  right: 10.93%;
+  width: 33.2%;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  min-height: 0;
+  align-items: center;
+  text-align: center;
+  gap: max(2px, calc(var(--ticket-height) * 0.009));
+}
+
+.badgePanel strong,
+.badgePanel span {
+  font-size: clamp(8px, calc(var(--ticket-width) * 0.0405), 11px);
+  line-height: 1.15;
+}
+
+.badgePanel strong {
+  font-weight: 700;
+}
+
+.contentPanel {
+  position: absolute;
+  top: 43.33%;
+  left: 13.77%;
+  width: 71.26%;
+  height: 33.03%;
+  display: grid;
+  grid-template-rows: 1fr auto;
+}
+
+.ticketList {
+  display: flex;
+  flex-direction: column;
+  gap: max(7px, calc(var(--ticket-height) * 0.0273));
 }
 
 .ticketRow {
   display: grid;
-  grid-template-columns: 24px 1fr;
-  gap: 4px;
-  color: #5e6361;
-  font-size: 8px;
-  line-height: 1.2;
+  grid-template-columns: 13.64% 1fr;
+  gap: max(4px, calc(var(--ticket-width) * 0.024));
+  color: #111111;
+  font-size: clamp(8px, calc(var(--ticket-width) * 0.0365), 10px);
+  font-weight: 500;
+  line-height: 1.1;
+}
+
+.ticketRow span:last-child {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .cardBottom {
   display: flex;
   justify-content: space-between;
-  gap: 8px;
-  align-items: center;
+  gap: max(6px, calc(var(--ticket-width) * 0.0405));
+  align-items: flex-end;
+  padding-top: max(8px, calc(var(--ticket-height) * 0.0364));
 }
 
 .customer,
 .total {
-  color: #5e6462;
-  font-size: 9px;
-  font-weight: 700;
+  color: #111111;
+  font-size: clamp(8px, calc(var(--ticket-width) * 0.0405), 11px);
+  font-weight: 500;
+  line-height: 1;
 }
 
 .total {
   text-align: right;
 }
 
-.cardFooter {
-  display: flex;
-  justify-content: center;
+.footerBadge {
+  position: absolute;
+  left: 50%;
+  bottom: 3.03%;
+  transform: translateX(-50%);
 }
 
-.statePill {
-  border-radius: 999px;
-  min-width: 76px;
-  height: 16px;
-  padding: 0 9px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 8px;
-  font-weight: 700;
-  letter-spacing: 0.01em;
+.footerBadgeDone,
+.footerBadgeTakeaway {
+  width: 44.53%;
 }
 
-.stateProcessing {
-  background: #f4b04d;
-  color: #f6f7f7;
+.footerBadgeProcessing {
+  width: 43.32%;
 }
 
-.stateTakeaway {
-  background: #6d7b80;
-  color: #edf5f5;
-}
-
-.stateDone {
-  background: #1fe24e;
-  color: #f6fff7;
+.footerBadgeSvg {
+  display: block;
+  width: 100%;
+  height: auto;
 }
 
 .error {
-  margin: 0;
   color: #c14d4d;
 }
 
-@media (max-width: 1200px) {
+@media (max-width: 1440px) {
   .page {
-    grid-template-rows: auto auto 1fr;
+    --ticket-gap: 18px;
   }
+}
 
-  .header {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
-  .grid {
-    grid-template-columns: repeat(2, 236px);
+@media (max-width: 1240px) {
+  .page {
+    --ticket-gap: 14px;
   }
 }

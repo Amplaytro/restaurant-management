@@ -1,6 +1,6 @@
 .page {
   display: grid;
-  grid-template-rows: auto minmax(100px, 0.17fr) minmax(0, 0.49fr) minmax(170px, 0.34fr);
+  grid-template-rows: auto minmax(100px, 0.17fr) minmax(300px, 0.49fr) minmax(170px, 0.34fr);
   gap: clamp(12px, 2vh, 24px);
   height: 100%;
   min-height: 0;
@@ -76,7 +76,7 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 20px; 
+  width: 20px;
   height: auto;
   object-fit: contain;
 }
@@ -100,24 +100,24 @@
 }
 
 .cardHeader {
-  padding: 14px 16px 12px;
+  padding: 10px 12px 8px;
   display: flex;
   justify-content: space-between;
-  gap: 12px;
+  gap: 6px;
   align-items: flex-start;
   border-bottom: 1px solid var(--color-border);
 }
 
 .cardHeader h2 {
   margin: 0 0 4px;
-  font-size: 24px;
+  font-size: 20px;
   color: #666;
 }
 
 .cardHeader p {
   margin: 0;
   color: #9ba09e;
-  font-size: 12px;
+  font-size: 10px;
 }
 
 .cardHeader select {
@@ -125,21 +125,21 @@
   background: white;
   color: #b0b4b2;
   border-radius: 999px;
-  padding: 9px 16px;
+  padding: 7px 12px;
 }
 
 .summaryStats {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 12px;
-  padding: 14px 14px 8px;
+  padding: 10px 10px 6px;
 }
 
 .summaryMetric {
   background: white;
   border-radius: 8px;
   border: 1px solid var(--color-border);
-  min-height: 74px;
+  min-height: 58px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -148,19 +148,19 @@
 
 .summaryMetric strong {
   color: #727575;
-  font-size: 26px;
+  font-size: 22px;
 }
 
 .summaryMetric span {
   color: #b5bab8;
-  font-size: 13px;
+  font-size: 11px;
 }
 
 .breakdownArea {
   display: grid;
-  grid-template-columns: 92px 1fr;
-  padding: 12px 18px 16px;
-  gap: 12px;
+  grid-template-columns: 72px 1fr;
+  padding: 8px 12px 10px;
+  gap: 10px;
   align-items: center;
   min-height: 0;
 }
@@ -171,16 +171,16 @@
 }
 
 .donut {
-  width: 72px;
-  height: 72px;
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
   display: grid;
   place-items: center;
 }
 
 .donutInner {
-  width: 43px;
-  height: 43px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   background: var(--color-panel-soft);
 }
@@ -193,11 +193,11 @@
 
 .breakdownRow {
   display: grid;
-  grid-template-columns: 68px 46px 1fr;
+  grid-template-columns: 54px 38px 1fr;
   gap: 8px;
   align-items: center;
   color: #9fa3a1;
-  font-size: 12px;
+  font-size: 10px;
 }
 
 .breakdownRow em {
@@ -206,7 +206,7 @@
 }
 
 .barTrack {
-  height: 9px;
+  height: 7px;
   border-radius: 999px;
   background: white;
   overflow: hidden;
@@ -219,16 +219,16 @@
 
 .chartSurface {
   position: relative;
-  padding: 8px 12px 14px;
+  padding: 6px 8px 8px;
   min-height: 0;
 }
 
 .chartColumns {
   position: absolute;
-  inset: 20px 14px 34px;
+  inset: 18px 12px 28px;
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 8px;
+  gap: 6px;
 }
 
 .chartColumns span {
@@ -238,7 +238,7 @@
 
 .chartSvg {
   width: 100%;
-  height: clamp(136px, 18vh, 170px);
+  height: clamp(108px, 14vh, 135px);
   position: relative;
   z-index: 1;
 }
@@ -246,10 +246,10 @@
 .chartLabels {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  font-size: 11px;
+  font-size: 9px;
   color: #6f7371;
   text-align: center;
-  margin-top: -8px;
+  margin-top: -4px;
 }
 
 .legend {
@@ -280,45 +280,179 @@
   border: 1px solid #d0d7d4;
 }
 
-.tablesGrid {
-  padding: 14px;
-  display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
-  gap: 7px;
+.tablesPanel {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
   min-height: 0;
-  flex: 1;
-  align-content: start;
-  overflow-y: auto;
-  overflow-x: hidden;
-  scrollbar-width: thin;
+  min-height: 300px;
+  overflow: visible;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
 }
 
-.tableCell {
+.tablesGraphic {
+  position: relative;
+  width: 360px;
+  min-width: 360px;
+  height: 300px;
+  flex: 0 0 360px;
+  font-family: "Poppins", var(--font-accent), sans-serif;
+}
+
+.tablesBackground {
+  box-sizing: border-box;
+  position: absolute;
+  inset: 0;
+  background: #f1f6f4;
+  border: 1px solid #d5dbd8;
+  border-radius: 8px;
+}
+
+.tablesDivider {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 0;
+  top: 64px;
+  border-top: 1px solid #d5dbd8;
+}
+
+.tablesHeaderBar {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.tablesHeaderContent {
+  position: absolute;
+  left: 12px;
+  top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  max-width: 252px;
+}
+
+.tablesHeading {
+  margin: 0 0 4px;
+  font-family: var(--font-body);
+  font-size: 20px;
+  font-weight: 700;
+  color: #666;
+}
+
+.tablesSubcopy {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 11px;
+  line-height: 13px;
+  font-weight: 400;
+  color: #9ba09e;
+}
+
+.tablesLegend {
+  position: absolute;
+  left: 222px;
+  top: 12px;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 0;
+  width: 139.46px;
+  height: 12.8px;
+  border-radius: 0;
+}
+
+.tablesLegendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: "Poppins", var(--font-accent), sans-serif;
+  font-size: 9px;
+  line-height: 12.8px;
+  font-weight: 400;
+  color: #767c79;
+  white-space: nowrap;
+}
+
+.tablesLegendDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex: 0 0 6px;
+}
+
+.tablesLegendDotReserved {
+  background: #41c764;
+}
+
+.tablesLegendDotAvailable {
+  background: #fff;
+  border: 1px solid #d0d7d4;
+}
+
+.tablesBookingGrid {
+  position: absolute;
+  left: 12px;
+  top: 72px;
+  width: 336px;
+  display: grid;
+  grid-template-columns: repeat(7, 42px);
+  grid-template-rows: repeat(5, 38px);
+  grid-auto-rows: 38px;
+  column-gap: 5px;
+  row-gap: 5px;
+  align-content: start;
+  z-index: 1;
+}
+
+.tableBookingCard {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 2px;
+  width: 42px;
+  height: 38px;
+  padding: 0;
+  background: #fff;
   border: 1px solid #cfd6d3;
-  background: white;
   border-radius: 2px;
-  padding: 5px 4px;
+  color: #000;
+}
+
+.tableBookingReserved {
+  background: #41c764;
+  color: #fff;
+}
+
+.tableBookingLabel,
+.tableBookingNumber {
+  display: block;
+  font-family: "Poppins", var(--font-accent), sans-serif;
+  font-style: normal;
   text-align: center;
 }
 
-.tableCell span {
-  display: block;
-  font-size: 8px;
-  color: #575b59;
+.tableBookingLabel {
+  margin: 0;
+  font-size: 7px;
+  line-height: 12px;
+  font-weight: 500;
 }
 
-.tableCell strong {
+.tableBookingNumber {
+  margin: 0;
   font-family: var(--font-numeric);
-  font-size: 22px;
-}
-
-.tableCellReserved {
-  background: var(--color-green);
-  color: white;
-}
-
-.tableCellReserved span {
-  color: rgba(255, 255, 255, 0.84);
+  font-size: 16px;
+  line-height: 1;
+  text-align: center;
+  font-weight: 500;
 }
 
 .chefCard {
@@ -377,12 +511,20 @@
 
 @media (max-height: 900px) {
   .page {
-    grid-template-rows: auto minmax(90px, 0.16fr) minmax(0, 0.48fr) minmax(156px, 0.32fr);
+    grid-template-rows: auto minmax(90px, 0.16fr) minmax(270px, 0.48fr) minmax(156px, 0.32fr);
     gap: 12px;
   }
 
   .cardHeader h2 {
-    font-size: 21px;
+    font-size: 19px;
+  }
+
+  .tablesHeading {
+    font-size: 19px;
+  }
+
+  .tablesSubcopy {
+    font-size: 10px;
   }
 
   .cardHeader p,
@@ -390,34 +532,41 @@
   .breakdownRow,
   .chartLabels,
   .legend {
-    font-size: 11px;
+    font-size: 10px;
   }
 
   .summaryMetric {
-    min-height: 66px;
+    min-height: 58px;
   }
 
   .summaryMetric strong {
-    font-size: 24px;
+    font-size: 22px;
   }
 
   .breakdownArea {
-    grid-template-columns: 76px 1fr;
-    padding-top: 10px;
+    grid-template-columns: 72px 1fr;
+    padding-top: 8px;
   }
 
   .donut {
-    width: 64px;
-    height: 64px;
+    width: 52px;
+    height: 52px;
   }
 
   .donutInner {
-    width: 38px;
-    height: 38px;
+    width: 30px;
+    height: 30px;
   }
 
   .tableHead,
   .tableRow {
-    padding: 0 18px;
+    padding: 0 16px;
+  }
+}
+
+@media (max-width: 520px) {
+  .tablesGraphic {
+    transform: scale(0.74);
+    transform-origin: top center;
   }
 }

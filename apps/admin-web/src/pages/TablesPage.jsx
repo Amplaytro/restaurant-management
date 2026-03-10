@@ -32,6 +32,11 @@ export function TablesPage() {
   async function handleCreateTable(event) {
     event.preventDefault();
 
+    if (tables.length >= 30) {
+      setError("Maximum number of tables (30) reached.");
+      return;
+    }
+
     try {
       const created = await adminApi.createTable({ capacity: Number(capacity), name });
       setTables((current) => [...current, created]);
@@ -98,7 +103,7 @@ export function TablesPage() {
           placeholder="Optional table name"
           value={name}
         />
-        <button type="submit">Add Table</button>
+        <button type="submit" disabled={tables.length >= 30}>Add Table</button>
       </form>
 
       {error ? <p className={styles.error}>{error}</p> : null}
